@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dad Jokes Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .joke-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .joke-text {
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: #333;
+            font-style: italic;
+            margin: 0;
+        }
+
+        .loading {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 1.1em;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            margin: 10px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .favorite-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            font-size: 0.9em;
+            padding: 10px 20px;
+        }
+
+        .favorite-btn:hover {
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        .favorites-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .favorites-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .favorite-joke {
+            background: #fff;
+            padding: 30px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 3px solid #e74c3c;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .remove-favorite {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .joke-text {
+                font-size: 1.1em;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>
+            StretchyWombat's <br>
+            Dad Joke Generator
+            <span class="emoji">😄</span>
+        </h2>
+        
+        <div class="joke-container">
+            <p class="joke-text loading">Click the button below to get your first dad joke!</p>
+        </div>
+        
+        <button class="btn" id="newJokeBtn">Get New Joke</button>
+        <button class="btn favorite-btn" id="favoriteBtn" style="display: none;">❤️ Save Favorite</button>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number" id="jokesViewed">0</span>
+                <div class="stat-label">Jokes Viewed</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="favoriteCount">0</span>
+                <div class="stat-label">Favorites Saved</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="laughCount">0</span>
+                <div class="stat-label">Laughs Generated</div>
+            </div>
+        </div>
+
+        <div class="favorites-section" id="favoritesSection" style="display: none;">
+            <h3 class="favorites-title">Your Favorite Jokes</h3>
+            <div id="favoritesList"></div>
+        </div>
+    </div>
+
+    <script>
+        class DadJokeGenerator {
+            constructor() {
+                this.currentJoke = null;
+                this.jokesViewed = 0;
+                this.favorites = JSON.parse(localStorage.getItem('dadJokeFavorites')) || [];
+                this.laughCount = parseInt(localStorage.getItem('laughCount')) || 0;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.updateStats();
+                this.displayFavorites();
+            }
+
+            initializeElements() {
+                this.jokeText = document.querySelector('.joke-text');
+                this.newJokeBtn = document.getElementById('newJokeBtn');
+                this.favoriteBtn = document.getElementById('favoriteBtn');
+                this.jokesViewedEl = document.getElementById('jokesViewed');
+                this.favoriteCountEl = document.getElementById('favoriteCount');
+                this.laughCountEl = document.getElementById('laughCount');
+                this.favoritesSection = document.getElementById('favoritesSection');
+                this.favoritesList = document.getElementById('favoritesList');
+            }
+
+            setupEventListeners() {
+                this.newJokeBtn.addEventListener('click', () => this.fetchNewJoke());
+                this.favoriteBtn.addEventListener('click', () => this.saveFavorite());
+                
+                // Easter egg: click on laugh count to increment it
+                this.laughCountEl.addEventListener('click', () => {
+                    this.laughCount++;
+                    localStorage.setItem('laughCount', this.laughCount);
+                    this.updateStats();
+                });
+            }
+
+            async fetchNewJoke() {
+                try {
+                    this.newJokeBtn.disabled = true;
+                    this.jokeText.textContent = 'Fetching a fresh dad joke...';
+                    this.jokeText.className = 'joke-text loading';
+                    this.favoriteBtn.style.display = 'none';
+
+                    const response = await fetch('https://icanhazdadjoke.com/', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'User-Agent': 'Dad Jokes Generator (https://github.com/example)'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    this.currentJoke = data;
+                    
+                    this.jokeText.textContent = data.joke;
+                    this.jokeText.className = 'joke-text';
+                    this.favoriteBtn.style.display = 'inline-block';
+                    
+                    this.jokesViewed++;
+                    this.updateStats();
+                    
+                } catch (error) {
+                    console.error('Error fetching joke:', error);
+                    this.jokeText.textContent = 'Oops! Couldn\'t fetch a joke right now. Maybe the internet needs a dad joke too! 😅';
+                    this.jokeText.className = 'joke-text error';
+                } finally {
+                    this.newJokeBtn.disabled = false;
+                }
+            }
+
+            saveFavorite() {
+                if (!this.currentJoke) return;
+
+                // Check if already favorited
+                const alreadyFavorited = this.favorites.some(fav => fav.id === this.currentJoke.id);
+                if (alreadyFavorited) {
+                    alert('This joke is already in your favorites!');
+                    return;
+                }
+
+                this.favorites.push({
+                    id: this.currentJoke.id,
+                    joke: this.currentJoke.joke,
+                    savedAt: new Date().toLocaleDateString()
+                });
+
+                localStorage.setItem('dadJokeFavorites', JSON.stringify(this.favorites));
+                this.updateStats();
+                this.displayFavorites();
+                
+                // Visual feedback
+                this.favoriteBtn.textContent = '❤️ Saved!';
+                setTimeout(() => {
+                    this.favoriteBtn.textContent = '❤️ Save Favorite';
+                }, 2000);
+            }
+
+            removeFavorite(id) {
+                this.favorites = this.favorites.filter(fav => fav.id !== id);
+                localStorage.setItem('dadJokeFavorites', JSON.stringify(this.favorites));
+                this.updateStats();
+                this.displayFavorites();
+            }
+
+            displayFavorites() {
+                if (this.favorites.length === 0) {
+                    this.favoritesSection.style.display = 'none';
+                    return;
+                }
+
+                this.favoritesSection.style.display = 'block';
+                this.favoritesList.innerHTML = '';
+
+                this.favorites.forEach(favorite => {
+                    const favoriteDiv = document.createElement('div');
+                    favoriteDiv.className = 'favorite-joke';
+                    favoriteDiv.innerHTML = `
+                        <button class="remove-favorite" onclick="dadJokeApp.removeFavorite('${favorite.id}')">×</button>
+                        <p>${favorite.joke}</p>
+                        <small style="color: #666;">Saved on ${favorite.savedAt}</small>
+                    `;
+                    this.favoritesList.appendChild(favoriteDiv);
+                });
+            }
+
+            updateStats() {
+                this.jokesViewedEl.textContent = this.jokesViewed;
+                this.favoriteCountEl.textContent = this.favorites.length;
+                this.laughCountEl.textContent = this.laughCount;
+            }
+
+            // Method to clear all data (for testing)
+            clearAllData() {
+                localStorage.removeItem('dadJokeFavorites');
+                localStorage.removeItem('laughCount');
+                this.favorites = [];
+                this.laughCount = 0;
+                this.jokesViewed = 0;
+                this.updateStats();
+                this.displayFavorites();
+            }
+        }
+
+        // Initialize the app
+        const dadJokeApp = new DadJokeGenerator();
+
+        // Add some fun keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                dadJokeApp.fetchNewJoke();
+            }
+            if (e.key === 'f' || e.key === 'F') {
+                if (dadJokeApp.currentJoke) {
+                    dadJokeApp.saveFavorite();
+                }
+            }
+        });
+
+        // Auto-fetch first joke after a short delay
+        setTimeout(() => {
+            dadJokeApp.fetchNewJoke();
+        }, 1000);
+    </script>
+</body>
+</html>
